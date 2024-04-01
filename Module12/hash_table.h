@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-typedef unsigned long ul;
+typedef unsigned long long ul;
 
 void print_debug(char *msg)
 {
@@ -20,6 +20,20 @@ typedef struct node
 } Node;
 
 typedef Node **HashTable; // if we have an array of pointers to nodes call that a hash table
+
+ul hash_function(char *str, int size)
+{
+    ul hash = 5381;
+    int char_address;
+
+    while ((char_address = *str++))
+    {
+        hash = ((hash << 5) + hash) + char_address;
+    }
+
+    return hash % size;
+}
+
 
 // note: remember that HashTable is actually an array of pointers
 HashTable create_hash_table(int size)
@@ -48,6 +62,58 @@ void ll_add_back(Node *head, Node *new)
     curr->next_node = new;
 }
 
+void print_node(Node *head)
+{
+    Node *curr = head;
+    while (curr != NULL)
+    {
+        printf("(\"%s\": \"%s\") ", curr->key, curr->value);
+        curr = curr->next_node;
+    }
+}
+
+void print_hash_table(HashTable tbl, int size)
+{
+    printf("{\n");
+    for (int i = 0; i < size; i++)
+    {
+        if (tbl[i] != NULL)
+        {
+            printf("%d - ", i);
+            print_node(tbl[i]);
+            printf("\n");
+        }
+    }
+
+    printf("}\n");
+}
+
+char *table_get(HashTable tbl, int tbl_size, char *key)
+{
+    ul hash = hash_function(key, tbl_size);
+    Node *slot = tbl[hash];
+
+    if (slot == NULL)
+    {
+        return NULL; // doesn't exist
+    }
+    else
+    {
+        while (slot != NULL)
+        {
+            if (slot->key == key)
+            {
+                return slot->value; // we found it
+            }
+            else
+            {
+                slot = slot->next_node; // otherwise keep on looking
+            }
+        }
+    }
+    return NULL; // searched entire linked list and couldn't find it
+}
+
 void free_table(HashTable table, int size)
 {
     for (int i = 0; i < size; i++)
@@ -71,44 +137,19 @@ void free_ll(Node *head)
     free(head);
 }
 
-// FIXME: returning negative numbers for everything except "Darth Vader"
-int hash_function(char *str)
-{
-    ul hash = 5381;
-    int char_address;
-
-    while ((char_address = *str++))
-    {
-        hash = ((hash << 5) + hash) + char_address;
-    }
-
-    return hash;
-}
-
 void add(HashTable tbl, int tbl_size, char *key, char *value)
 {
-    printf("key = %s\n", key);
-    int hash = hash_function(key) % tbl_size;
-    if (hash < 0)
-    {
-        print_debug("FIXING NEGATIVE HASH!");
-        hash = hash * -1;
-    }
-
-    printf("\thash %s --> %d\n", key, hash);
-    fflush(stdout);
-
+    ul hash = hash_function(key, tbl_size);
     Node *new_node = create_node(key, value);
-    print_debug("successfully create new node");
 
     if (tbl[hash] == NULL)
     {
-        print_debug("detected no collision");
+        // print_debug("detected no collision");
         tbl[hash] = new_node; // no collision just add the node here
     }
     else
     {
-        print_debug("detected collision");
+        print_debug("\tdetected collision");
         ll_add_back(tbl[hash], new_node); // there was a collision so add to the existing node/linked list
     }
 }
