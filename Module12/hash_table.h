@@ -4,8 +4,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-
-#define SIZE 100
 typedef unsigned long ul;
 
 void print_debug(char *msg)
@@ -24,10 +22,9 @@ typedef struct node
 typedef Node **HashTable; // if we have an array of pointers to nodes call that a hash table
 
 // note: remember that HashTable is actually an array of pointers
-HashTable create_hash_table()
+HashTable create_hash_table(int size)
 {
-    Node **new_table = malloc(sizeof(Node) * SIZE);
-    return new_table;
+    return malloc(sizeof(Node) * size);
 }
 
 Node *create_node(char *key, char *value)
@@ -51,9 +48,9 @@ void ll_add_back(Node *head, Node *new)
     curr->next_node = new;
 }
 
-void free_table(HashTable table)
+void free_table(HashTable table, int size)
 {
-    for (int i = 0; i < SIZE; i++)
+    for (int i = 0; i < size; i++)
     {
         free(table[i]); // free the nodes
     }
@@ -88,17 +85,17 @@ int hash_function(char *str)
     return hash;
 }
 
-void add(HashTable tbl, char *key, char *value)
+void add(HashTable tbl, int tbl_size, char *key, char *value)
 {
     printf("key = %s\n", key);
-    int hash = hash_function(key) % SIZE;
+    int hash = hash_function(key) % tbl_size;
     if (hash < 0)
     {
-        print_debug("FIXING NEGATIVE HASH!"); // debug
+        print_debug("FIXING NEGATIVE HASH!");
         hash = hash * -1;
     }
 
-    printf("hash %s --> %d\n", key, hash);
+    printf("\thash %s --> %d\n", key, hash);
     fflush(stdout);
 
     Node *new_node = create_node(key, value);
