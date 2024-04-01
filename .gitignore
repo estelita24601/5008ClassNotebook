@@ -240,3 +240,4 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+.vscode/tasks.json
