@@ -5,12 +5,12 @@
 #include <string.h>
 #include <stdio.h>
 
-#define SIZE 1
+#define SIZE 100
 typedef unsigned long ul;
 
 void print_debug(char *msg)
 {
-    printf("~~~~ %s\n", msg);
+    printf("\t%s\n", msg);
     fflush(stdout);
 }
 
@@ -22,20 +22,6 @@ typedef struct node
 } Node;
 
 typedef Node **HashTable; // if we have an array of pointers to nodes call that a hash table
-
-// FIXME: returning negative numbers for everything except "Darth Vader"
-int hash_function(char *str)
-{
-    ul hash = 5381;
-    int char_address;
-
-    while ((char_address = *str++))
-    {
-        hash = ((hash << 5) + hash) + char_address;
-    }
-
-    return hash;
-}
 
 // note: remember that HashTable is actually an array of pointers
 HashTable create_hash_table()
@@ -88,12 +74,27 @@ void free_ll(Node *head)
     free(head);
 }
 
+// FIXME: returning negative numbers for everything except "Darth Vader"
+int hash_function(char *str)
+{
+    ul hash = 5381;
+    int char_address;
+
+    while ((char_address = *str++))
+    {
+        hash = ((hash << 5) + hash) + char_address;
+    }
+
+    return hash;
+}
+
 void add(HashTable tbl, char *key, char *value)
 {
+    printf("key = %s\n", key);
     int hash = hash_function(key) % SIZE;
     if (hash < 0)
     {
-        print_debug("FIXING NEGATIVE HASH!");
+        print_debug("FIXING NEGATIVE HASH!"); // debug
         hash = hash * -1;
     }
 
