@@ -11,7 +11,7 @@ ul djb2(char *str)
     int char_address;
 
     // at top of every loop increment the char_address to the next address in the string
-    // if next address in string is for \0 then the loop stops HOW/WHY?
+    // NOTE: if next address in string is for \0 then the loop stops HOW/WHY?
     while ((char_address = *str++))
     {
         hash = (hash + (hash << 5)) + char_address;
